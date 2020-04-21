@@ -1,0 +1,38 @@
+{
+  "name": "blackplatinum/zarinpal",
+  "description": "The Zarinpal gateway implementation for Laravel.",
+  "keywords": [
+    "payment gateway",
+    "zarinpal",
+    "payment"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "BlackPlatinum Developers",
+      "email": "blackplatinum2019@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.1",
+    "ext-soap": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "BlackPlatinum\\Zarinpal\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "BlackPlatinum\\Zarinpal\\ZarinpalServiceProvider"
+      ],
+      "aliases": {
+        "Zarinpal": "BlackPlatinum\\Zarinpal\\Zarinpal"
+      }
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
