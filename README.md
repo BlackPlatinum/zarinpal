@@ -24,7 +24,15 @@ In your config folder open app.php and add following lines:
     'Zarinpal' => BlackPlatinum\Zarinpal\Zarinpal::class,
 ],
 ```
-##### How To Run:
+
+Then add your Merchant ID in .env like this:
+```php
+MERCHANT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
+```
+In the end restart your server.
+
+How To Run:
+-----------
 
 ```php
 
