@@ -15,7 +15,7 @@ class Zarinpal
     private $merchantId;
 
     /**
-     * @var double The total price
+     * @var int The total price
      */
     private $price;
 
@@ -40,7 +40,7 @@ class Zarinpal
     private $gateWayUrl;
 
     /**
-     * @var string The Authority code
+     * @var string The authority code
      */
     private $authority;
 
@@ -48,11 +48,6 @@ class Zarinpal
      * @var string The request mode (payment request or payment verification)
      */
     private $mod;
-
-    /**
-     * @var array Defined modes
-     */
-    private const MODES = ['request', 'verification'];
 
     /**
      * @var string Request mode alias name
@@ -65,38 +60,95 @@ class Zarinpal
     private const VERIFICATION = 'verification';
 
     /**
+     * @var array Defined modes
+     */
+    private const MODES = [self::REQUEST, self::VERIFICATION];
+
+    /**
      * Create an instance of PaymentRequest
      *
      * @param  string  $mode
      * @param  array  $paymentData
+     * @param  bool  $enableSandbox
      */
-    public function __construct($mode, array $paymentData)
+    public function __construct($mode, array $paymentData, $enableSandbox = false)
     {
         if (!$this->isValidMode($mode)) {
             throw new \RuntimeException("$mode is not a predefined mode.");
         }
 
         if (!$this->isValidPaymentData($mode, $paymentData) || $paymentData === []) {
-            throw new \RuntimeException("paymentData is not valid.");
+            throw new \RuntimeException("payment data array is not valid.");
         }
 
         if ($mode === self::REQUEST) {
             $this->mod = $mode;
-            $this->merchantId = $paymentData['merchantId'];
+            $this->merchantId = env('merchant_id');
             $this->price = $paymentData['price'];
             $this->description = $paymentData['description'];
-            $this->callbackUrl = env('app_url').$paymentData['callbackUri'].$paymentData['orderId'];
+            $this->callbackUrl = env('app_url').'/'.$paymentData['callbackUri'].'/'.$paymentData['orderId'];
             $this->paymentRequest = 'https://www.zarinpal.com/pg/services/WebGate/wsdl';
             $this->gateWayUrl = 'https://www.zarinpal.com/pg/StartPay/';
         }
 
         if ($mode === self::VERIFICATION) {
             $this->mod = $mode;
-            $this->merchantId = $paymentData['merchantId'];
+            $this->merchantId = env('merchant_id');
             $this->price = $paymentData['price'];
             $this->authority = $paymentData['authority'];
             $this->paymentRequest = 'https://www.zarinpal.com/pg/services/WebGate/wsdl';
         }
+
+        if ($enableSandbox) {
+            $this->enableSandBox();
+        }
+    }
+
+    /**
+     * Validates request mode
+     *
+     * @param  string  $mode
+     * @return bool
+     */
+    private function isValidMode($mode)
+    {
+        return in_array(strtolower($mode), self::MODES, true);
+    }
+
+    /**
+     * Validates payment data array
+     *
+     * @param  string  $mode
+     * @param  array  $paymentData
+     * @return bool
+     */
+    private function isValidPaymentData($mode, array $paymentData)
+    {
+        $keys = array_keys($paymentData);
+
+        if ($mode === self::REQUEST) {
+            return array_diff($keys, ['price', 'description', 'callbackUri', 'orderId']) === Array();
+        }
+
+        return array_diff($keys, ['price', 'authority']) === Array();
+    }
+
+    /**
+     * Enables sandbox mode (testing)
+     *
+     * @return void
+     */
+    private function enableSandBox()
+    {
+        if ($this->mod === self::REQUEST) {
+            $this->isDevelopingMode = true;
+            $this->paymentRequest = 'https://sandbox.zarinpal.com/pg/services/WebGate/wsdl';
+            $this->gateWayUrl = 'https://sandbox.zarinpal.com/pg/StartPay/';
+            return;
+        }
+
+        $this->paymentRequest = 'https://sandbox.zarinpal.com/pg/services/WebGate/wsdl';
+        return;
     }
 
     /**
@@ -148,7 +200,7 @@ class Zarinpal
      * @return object|array|bool
      * @throws \SoapFault
      */
-    public function receivePaymentInfo($status)
+    public function receivePaymentInfoFromGateway($status)
     {
         if ($this->mod !== self::VERIFICATION) {
             throw new \RuntimeException("You can not call this method on $this->mod mode.");
@@ -167,52 +219,5 @@ class Zarinpal
         }
 
         return false;
-    }
-
-    /**
-     * Enables sandbox mode (testing)
-     *
-     * @return void
-     */
-    public function enableSandBox()
-    {
-        if ($this->mod === self::REQUEST) {
-            $this->isDevelopingMode = true;
-            $this->paymentRequest = 'https://sandbox.zarinpal.com/pg/services/WebGate/wsdl';
-            $this->gateWayUrl = 'https://sandbox.zarinpal.com/pg/StartPay/';
-            return;
-        }
-
-        $this->paymentRequest = 'https://sandbox.zarinpal.com/pg/services/WebGate/wsdl';
-        return;
-    }
-
-    /**
-     * Validates request mode
-     *
-     * @param  string  $mode
-     * @return bool
-     */
-    private function isValidMode($mode)
-    {
-        return in_array(strtolower($mode), self::MODES, true);
-    }
-
-    /**
-     * Validates payment data array
-     *
-     * @param  string  $mode
-     * @param  array  $paymentData
-     * @return bool
-     */
-    private function isValidPaymentData($mode, array $paymentData)
-    {
-        $keys = array_keys($paymentData);
-
-        if ($mode === self::REQUEST) {
-            return array_diff($keys, ['merchantId', 'price', 'description', 'callbackUri', 'orderId']) === Array();
-        }
-
-        return array_diff($keys, ['merchantId', 'price', 'authority']) === Array();
     }
 }
