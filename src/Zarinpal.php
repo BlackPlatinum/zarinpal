@@ -65,7 +65,7 @@ class Zarinpal
     private const MODES = [self::REQUEST, self::RESPONSE];
 
     /**
-     * Create an instance of PaymentRequest
+     * Create an instance of Zarinpal
      *
      * @param  string  $mode
      * @param  array  $paymentData
