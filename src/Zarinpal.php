@@ -45,7 +45,7 @@ class Zarinpal
     private $authority;
 
     /**
-     * @var string The request mode (payment request or payment verification)
+     * @var string The request mode (payment request or payment response)
      */
     private $mod;
 
@@ -55,14 +55,14 @@ class Zarinpal
     private const REQUEST = 'request';
 
     /**
-     * @var string Verification mode alias name
+     * @var string Response mode alias name
      */
-    private const VERIFICATION = 'verification';
+    private const RESPONSE = 'response';
 
     /**
      * @var array Defined modes
      */
-    private const MODES = [self::REQUEST, self::VERIFICATION];
+    private const MODES = [self::REQUEST, self::RESPONSE];
 
     /**
      * Create an instance of PaymentRequest
@@ -91,7 +91,7 @@ class Zarinpal
             $this->gateWayUrl = 'https://www.zarinpal.com/pg/StartPay/';
         }
 
-        if ($mode === self::VERIFICATION) {
+        if ($mode === self::RESPONSE) {
             $this->mod = $mode;
             $this->merchantId = env('merchant_id');
             $this->price = $paymentData['price'];
@@ -202,7 +202,7 @@ class Zarinpal
      */
     public function receivePaymentInfoFromGateway($status)
     {
-        if ($this->mod !== self::VERIFICATION) {
+        if ($this->mod !== self::RESPONSE) {
             throw new \RuntimeException("You can not call this method on $this->mod mode.");
         }
 
