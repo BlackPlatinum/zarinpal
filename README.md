@@ -24,12 +24,13 @@ In your config folder open app.php and add following lines:
     'Zarinpal' => BlackPlatinum\Zarinpal\Zarinpal::class,
 ],
 ```
-
+ 
 Then add your Merchant ID in .env like this:
 ```php
 MERCHANT_ID=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
 ```
-In the end restart your server.
+In the end restart your server. (Also you can ignore adding merchant id to .env and use it in your
+source code with setMerchantId())
 
 How To Run:
 -----------
@@ -76,6 +77,10 @@ $paymentResponse = new Zarinpal(
 $result = $paymentResponse->receivePaymentInfoFromGateway($request->Status);
 if ($result) {
     // Yor payment done successfully
+    $authority = $request->input('Authority');
+    $status = $request->input('Status');
+    $refId = $result->RefID;
+    // Do the rest...
 }
 else {
     // Yor payment failed or you canceled payment
