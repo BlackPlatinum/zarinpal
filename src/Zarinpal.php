@@ -83,17 +83,17 @@ class Zarinpal
 
         if ($mode === self::REQUEST) {
             $this->mod = $mode;
-            $this->merchantId = env('merchant_id');
+            $this->merchantId = env('MERCHANT_ID');
             $this->price = $paymentData['price'];
             $this->description = $paymentData['description'];
-            $this->callbackUrl = env('app_url').'/'.$paymentData['callbackUri'].'/'.$paymentData['orderId'];
+            $this->callbackUrl = env('APP_URL').'/'.$paymentData['callbackUri'].'/'.$paymentData['orderId'];
             $this->paymentRequest = 'https://www.zarinpal.com/pg/services/WebGate/wsdl';
             $this->gateWayUrl = 'https://www.zarinpal.com/pg/StartPay/';
         }
 
         if ($mode === self::RESPONSE) {
             $this->mod = $mode;
-            $this->merchantId = env('merchant_id');
+            $this->merchantId = env('MERCHANT_ID');
             $this->price = $paymentData['price'];
             $this->authority = $paymentData['authority'];
             $this->paymentRequest = 'https://www.zarinpal.com/pg/services/WebGate/wsdl';
@@ -149,6 +149,19 @@ class Zarinpal
 
         $this->paymentRequest = 'https://sandbox.zarinpal.com/pg/services/WebGate/wsdl';
         return;
+    }
+
+    /**
+     * Set system merchant id
+     *
+     * @param  string  $merchantId
+     * @return Zarinpal
+     */
+    public function setMerchantId($merchantId)
+    {
+        $this->merchantId = $merchantId;
+
+        return $this;
     }
 
     /**
